@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Log</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    }
+
+    html, body {
+      background: transparent !important;
+      width: 100%;
+      height: 100%;
+      color: #1f2937;
+      padding: 6px;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Widget Header Styling */
+    .widget-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .widget-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #6b7280;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .widget-title svg {
+      width: 15px;
+      height: 15px;
+      fill: #6b7280;
+      flex-shrink: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: #8c9aa7;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      opacity: 0.7;
+      transition: opacity 0.15s ease, background-color 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      opacity: 1;
+      background-color: rgba(140, 154, 167, 0.15);
+    }
+
+    .icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* Section Tabs */
+    .tabs-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #6b7280;
+      cursor: pointer;
+      border-radius: 9999px;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(140, 154, 167, 0.15);
+      color: #1f2937;
+    }
+
+    .tab-btn.active {
+      background: #8c9aa7;
+      color: #ffffff;
+    }
+
+    /* Settings Dropdown Menu */
+    .settings-dropdown {
+      position: absolute;
+      top: 36px;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      width: 240px;
+      z-index: 100;
+    }
+
+    .settings-dropdown.active {
+      display: flex;
+    }
+
+    .settings-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    .search-input, .select-filter {
+      padding: 6px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+      background: #ffffff;
+      color: #374151;
+      width: 100%;
+    }
+
+    .select-filter {
+      cursor: pointer;
+    }
+
+    /* Side-by-Side Book Grid */
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, max-content));
+      gap: 16px;
+      width: 100%;
+    }
+
+    .book-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: box-shadow 0.15s ease;
+      width: max-content;
+      max-width: 100%;
+    }
+
+    .book-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    /* Standard Book Aspect Ratio Cover Photo */
+    .book-cover-wrapper {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      max-height: 180px;
+      border-radius: 8px;
+      background: #dbe1e4;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .book-cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .book-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .book-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .book-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1f2937;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+
+    .book-author {
+      font-size: 13px;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    .genre-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin: 2px 0;
+    }
+
+    .genre-tag {
+      font-size: 11px;
+      background: #dbe1e4;
+      color: #2c313f;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: #8c9aa7;
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    /* Rating Stars */
+    .star-rating-display {
+      display: flex;
+      gap: 3px;
+    }
+
+    .star-icon {
+      width: 14px;
+      height: 14px;
+      fill: #dbe1e4;
+    }
+
+    .star-icon.filled {
+      fill: #8c9aa7;
+    }
+
+    .book-dates {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .book-review {
+      font-size: 12px;
+      color: #4b5563;
+      margin-top: 6px;
+      background: #f9fafb;
+      padding: 8px;
+      border-radius: 6px;
+      border-left: 3px solid #8c9aa7;
+    }
+
+    /* Card Actions */
+    .card-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .action-icon-btn {
+      background: transparent;
+      border: none;
+      color: #8c9aa7;
+      cursor: pointer;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      opacity: 0.6;
+      transition: opacity 0.15s ease, background-color 0.15s ease;
+    }
+
+    .action-icon-btn:hover {
+      opacity: 1;
+      background-color: rgba(140, 154, 167, 0.15);
+    }
+
+    .action-icon-btn.delete:hover {
+      color: #ef4444;
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .action-icon-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 360px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #4b5563;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      padding: 7px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      background: #fff;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: #8c9aa7;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .custom-genre-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .genre-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #f9fafb;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    .genre-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .modal-stars {
+      display: flex;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .modal-star {
+      width: 22px;
+      height: 22px;
+      fill: #dbe1e4;
+      transition: fill 0.1s ease;
+    }
+
+    .modal-star.active {
+      fill: #8c9aa7;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .add-btn, .cancel-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #d1d5db;
+    }
+
+    .add-btn {
+      background: #8c9aa7;
+      color: white;
+      border-color: #8c9aa7;
+    }
+
+    .add-btn:hover {
+      opacity: 0.9;
+    }
+
+    .cancel-btn {
+      background: #fff;
+      color: #374151;
+    }
+
+    .cancel-btn:hover {
+      background: #f9fafb;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: #9ca3af;
+      font-size: 13px;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="widget-header-row">
+      <div class="widget-title">
+        <svg viewBox="0 0 24 24">
+          <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+        </svg>
+        Books
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="open-add-modal-btn" title="Add Book">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="settings-toggle-btn" title="Filter & Sort">
+          <svg viewBox="0 0 24 24">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Settings Dropdown Menu -->
+      <div class="settings-dropdown" id="settings-dropdown">
+        <div class="form-group">
+          <span class="settings-label">Search</span>
+          <input type="text" class="search-input" id="search-input" placeholder="Search books...">
+        </div>
+        <div class="form-group">
+          <span class="settings-label">Genre</span>
+          <select class="select-filter" id="genre-filter">
+            <option value="">All Genres</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <span class="settings-label">Rating</span>
+          <select class="select-filter" id="rating-filter">
+            <option value="">All Ratings</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4+ Stars</option>
+            <option value="3">3+ Stars</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <span class="settings-label">Sort By</span>
+          <select class="select-filter" id="sort-select">
+            <option value="title-asc">Title (A-Z)</option>
+            <option value="rating-desc">Rating (High)</option>
+            <option value="date-desc">Recent Finished</option>
+            <option value="progress-desc">Progress (%)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sections Tabs -->
+    <div class="tabs-row" id="tabs-row">
+      <button class="tab-btn active" data-tab="all">All Books</button>
+      <button class="tab-btn" data-tab="unread">Unread</button>
+      <button class="tab-btn" data-tab="in-progress">In Progress</button>
+      <button class="tab-btn" data-tab="read">Read</button>
+    </div>
+
+    <div class="book-grid" id="book-grid"></div>
+  </div>
+
+  <!-- Add / Edit Book Modal -->
+  <div class="modal-overlay" id="book-modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-heading">Add New Book</div>
+      <form id="book-form" style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="hidden" id="book-id">
+        
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-input" id="book-title" required placeholder="Book title">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Author</label>
+          <input type="text" class="form-input" id="book-author" required placeholder="Author name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Cover Image & Position</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="file" id="cover-file-input" accept="image/*" style="display: none;">
+            <button type="button" class="cancel-btn" id="upload-cover-btn" style="flex: 1;">Upload Image</button>
+            <input type="text" class="form-input" id="book-cover" placeholder="Or paste image URL" style="flex: 2;">
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <span class="form-label" style="font-size: 10px; white-space: nowrap;">Crop Pos:</span>
+            <input type="range" id="cover-position-slider" min="0" max="100" value="50" style="flex: 1; cursor: pointer;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Genres (Add/Edit inside library or below)</label>
+          <div class="genre-checkboxes" id="genre-checkboxes-container"></div>
+          <div class="custom-genre-row">
+            <input type="text" class="form-input" id="custom-genre-input" placeholder="Add custom genre..." style="flex: 1;">
+            <button type="button" class="cancel-btn" id="add-custom-genre-btn">Add</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Current Page</label>
+            <input type="number" class="form-input" id="book-current-page" min="0" value="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Pages</label>
+            <input type="number" class="form-input" id="book-total-pages" min="1" value="100" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Rating</label>
+          <div class="modal-stars" id="modal-stars-container">
+            <svg class="modal-star" data-rating="1" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="modal-star" data-rating="2" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="modal-star" data-rating="3" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="modal-star" data-rating="4" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="modal-star" data-rating="5" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </div>
+          <input type="hidden" id="book-rating" value="0">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date Started</label>
+            <input type="date" class="form-input" id="book-date-started">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date Ended</label>
+            <input type="date" class="form-input" id="book-date-ended">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Review / Notes</label>
+          <textarea class="form-textarea" id="book-review" rows="2" placeholder="Write your thoughts..."></textarea>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="button" class="cancel-btn" id="close-modal-btn">Cancel</button>
+          <button type="submit" class="add-btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let availableGenres = JSON.parse(localStorage.getItem('book_log_genres')) || ["Fiction", "Non-Fiction", "Sci-Fi", "Fantasy", "Self-Help"];
+    let books = JSON.parse(localStorage.getItem('book_log_items')) || [
+      {
+        id: "1",
+        title: "Atomic Habits",
+        author: "James Clear",
+        cover: "",
+        coverPosition: 50,
+        genres: ["Self-Help", "Non-Fiction"],
+        currentPage: 320,
+        totalPages: 320,
+        rating: 5,
+        dateStarted: "2026-01-10",
+        dateEnded: "2026-01-25",
+        review: "Life-changing insights on building good habits."
+      }
+    ];
+
+    let currentTab = 'all';
+
+    const bookGridEl = document.getElementById('book-grid');
+    const bookModalEl = document.getElementById('book-modal');
+    const openModalBtn = document.getElementById('open-add-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const bookFormEl = document.getElementById('book-form');
+    const modalHeading = document.getElementById('modal-heading');
+    
+    const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+    const settingsDropdown = document.getElementById('settings-dropdown');
+    const searchInput = document.getElementById('search-input');
+    const genreFilter = document.getElementById('genre-filter');
+    const ratingFilter = document.getElementById('rating-filter');
+    const sortSelect = document.getElementById('sort-select');
+    const tabsRow = document.getElementById('tabs-row');
+    
+    const genreCheckboxesContainer = document.getElementById('genre-checkboxes-container');
+    const customGenreInput = document.getElementById('custom-genre-input');
+    const addCustomGenreBtn = document.getElementById('add-custom-genre-btn');
+    
+    const uploadCoverBtn = document.getElementById('upload-cover-btn');
+    const coverFileInput = document.getElementById('cover-file-input');
+    const bookCoverInput = document.getElementById('book-cover');
+    const coverPositionSlider = document.getElementById('cover-position-slider');
+
+    const modalStars = document.querySelectorAll('.modal-star');
+    const bookRatingInput = document.getElementById('book-rating');
+    const currentPageInput = document.getElementById('book-current-page');
+    const totalPagesInput = document.getElementById('book-total-pages');
+    const dateStartedInput = document.getElementById('book-date-started');
+    const dateEndedInput = document.getElementById('book-date-ended');
+
+    settingsToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      settingsDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!settingsDropdown.contains(e.target) && e.target !== settingsToggleBtn) {
+        settingsDropdown.classList.remove('active');
+      }
+    });
+
+    // Tab switching
+    tabsRow.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-btn')) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentTab = e.target.dataset.tab;
+        renderBooks();
+      }
+    });
+
+    function saveToStorage() {
+      localStorage.setItem('book_log_items', JSON.stringify(books));
+      localStorage.setItem('book_log_genres', JSON.stringify(availableGenres));
+    }
+
+    function getTodayDateString() {
+      const today = new Date();
+      return today.toISOString().split('T')[0];
+    }
+
+    function initGenreUI() {
+      genreFilter.innerHTML = '<option value="">All Genres</option>';
+      availableGenres.forEach(genre => {
+        const opt = document.createElement('option');
+        opt.value = genre;
+        opt.textContent = genre;
+        genreFilter.appendChild(opt);
+      });
+
+      genreCheckboxesContainer.innerHTML = '';
+      availableGenres.forEach(genre => {
+        const label = document.createElement('label');
+        label.className = 'genre-checkbox-label';
+        label.innerHTML = `<input type="checkbox" name="modal-genre" value="${genre}"> ${genre}`;
+        genreCheckboxesContainer.appendChild(label);
+      });
+    }
+
+    addCustomGenreBtn.addEventListener('click', () => {
+      const val = customGenreInput.value.trim();
+      if (val && !availableGenres.includes(val)) {
+        availableGenres.push(val);
+        saveToStorage();
+        initGenreUI();
+        customGenreInput.value = '';
+        const newCb = document.querySelector(`input[name="modal-genre"][value="${val}"]`);
+        if (newCb) newCb.checked = true;
+      }
+    });
+
+    uploadCoverBtn.addEventListener('click', () => coverFileInput.click());
+    coverFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+          bookCoverInput.value = uploadEvent.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function setModalStars(rating) {
+      bookRatingInput.value = rating;
+      modalStars.forEach(star => {
+        const starVal = parseInt(star.dataset.rating);
+        if (starVal <= rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    modalStars.forEach(star => {
+      star.addEventListener('click', () => {
+        setModalStars(parseInt(star.dataset.rating));
+      });
+    });
+
+    currentPageInput.addEventListener('input', () => {
+      const current = parseInt(currentPageInput.value) || 0;
+      const total = parseInt(totalPagesInput.value) || 100;
+      const today = getTodayDateString();
+
+      if (current > 0 && !dateStartedInput.value) {
+        dateStartedInput.value = today;
+      }
+
+      if (current >= total && !dateEndedInput.value) {
+        dateEndedInput.value = today;
+      }
+    });
+
+    totalPagesInput.addEventListener('input', () => {
+      const current = parseInt(currentPageInput.value) || 0;
+      const total = parseInt(totalPagesInput.value) || 100;
+      if (current >= total && !dateEndedInput.value) {
+        dateEndedInput.value = getTodayDateString();
+      }
+    });
+
+    function renderBooks() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedGenre = genreFilter.value;
+      const selectedRating = ratingFilter.value;
+      const sortBy = sortSelect.value;
+
+      let filtered = books.filter(book => {
+        const matchesSearch = book.title.toLowerCase().includes(searchTerm) || book.author.toLowerCase().includes(searchTerm);
+        const matchesGenre = !selectedGenre || (book.genres && book.genres.includes(selectedGenre));
+        const matchesRating = !selectedRating || book.rating >= parseInt(selectedRating);
+        
+        // Tab filtering
+        const cur = book.currentPage || 0;
+        const tot = book.totalPages || 100;
+        let matchesTab = true;
+        if (currentTab === 'unread') {
+          matchesTab = (cur === 0);
+        } else if (currentTab === 'in-progress') {
+          matchesTab = (cur > 0 && cur < tot);
+        } else if (currentTab === 'read') {
+          matchesTab = (cur >= tot);
+        }
+
+        return matchesSearch && matchesGenre && matchesRating && matchesTab;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortBy === 'title-asc') {
+          return a.title.localeCompare(b.title);
+        } else if (sortBy === 'rating-desc') {
+          return b.rating - a.rating;
+        } else if (sortBy === 'date-desc') {
+          return (b.dateEnded || '').localeCompare(a.dateEnded || '');
+        } else if (sortBy === 'progress-desc') {
+          const pA = a.totalPages ? (a.currentPage / a.totalPages) : 0;
+          const pB = b.totalPages ? (b.currentPage / b.totalPages) : 0;
+          return pB - pA;
+        }
+      });
+
+      bookGridEl.innerHTML = '';
+
+      if (filtered.length === 0) {
+        bookGridEl.innerHTML = `<div class="empty-state">No books found</div>`;
+        return;
+      }
+
+      filtered.forEach(book => {
+        const percent = book.totalPages > 0 ? Math.min(100, Math.round((book.currentPage / book.totalPages) * 100)) : 0;
+        const coverPos = book.coverPosition !== undefined ? book.coverPosition : 50;
+        
+        let starsHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          const filledClass = i <= book.rating ? 'filled' : '';
+          starsHtml += `<svg class="star-icon ${filledClass}" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'book-card';
+        card.innerHTML = `
+          <div class="book-cover-wrapper">
+            <img class="book-cover" src="${book.cover || ''}" alt="${book.title}" style="object-position: center ${coverPos}%;" onerror="this.style.display='none'">
+          </div>
+          <div class="book-info">
+            <div class="book-title-row">
+              <div class="book-title">${book.title}</div>
+              <div class="card-actions">
+                <button class="action-icon-btn" onclick="editBook('${book.id}')" title="Edit Book">
+                  <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                </button>
+                <button class="action-icon-btn delete" onclick="deleteBook('${book.id}')" title="Delete Book">
+                  <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="book-author">${book.author}</div>
+            <div class="genre-tags">
+              ${(book.genres || []).map(g => `<span class="genre-tag">${g}</span>`).join('')}
+            </div>
+            <div class="star-rating-display">${starsHtml}</div>
+            <div class="progress-container">
+              <div class="progress-meta">
+                <span>Page ${book.currentPage} / ${book.totalPages}</span>
+                <span>${percent}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${percent}%;"></div>
+              </div>
+            </div>
+            ${book.dateStarted || book.dateEnded ? `<div class="book-dates">${book.dateStarted ? 'Started: ' + book.dateStarted : ''} ${book.dateStarted && book.dateEnded ? '• ' : ''} ${book.dateEnded ? 'Finished: ' + book.dateEnded : ''}</div>` : ''}
+            ${book.review ? `<div class="book-review">${book.review}</div>` : ''}
+          </div>
+        `;
+        bookGridEl.appendChild(card);
+      });
+    }
+
+    openModalBtn.addEventListener('click', () => {
+      modalHeading.textContent = "Add New Book";
+      bookFormEl.reset();
+      document.getElementById('book-id').value = '';
+      coverPositionSlider.value = 50;
+      document.querySelectorAll('input[name="modal-genre"]').forEach(cb => cb.checked = false);
+      setModalStars(0);
+      bookModalEl.classList.add('active');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      bookModalEl.classList.remove('active');
+    });
+
+    bookModalEl.addEventListener('click', (e) => {
+      if (e.target === bookModalEl) bookModalEl.classList.remove('active');
+    });
+
+    bookFormEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('book-id').value;
+      const title = document.getElementById('book-title').value;
+      const author = document.getElementById('book-author').value;
+      const cover = bookCoverInput.value;
+      const coverPosition = parseInt(coverPositionSlider.value) || 50;
+      const currentPage = parseInt(currentPageInput.value) || 0;
+      const totalPages = parseInt(totalPagesInput.value) || 100;
+      const rating = parseInt(bookRatingInput.value) || 0;
+      const dateStarted = dateStartedInput.value;
+      const dateEnded = dateEndedInput.value;
+      const review = document.getElementById('book-review').value;
+
+      const selectedGenres = [];
+      document.querySelectorAll('input[name="modal-genre"]:checked').forEach(cb => {
+        selectedGenres.push(cb.value);
+      });
+
+      if (id) {
+        const book = books.find(b => b.id === id);
+        if (book) {
+          book.title = title;
+          book.author = author;
+          book.cover = cover;
+          book.coverPosition = coverPosition;
+          book.genres = selectedGenres;
+          book.currentPage = currentPage;
+          book.totalPages = totalPages;
+          book.rating = rating;
+          book.dateStarted = dateStarted;
+          book.dateEnded = dateEnded;
+          book.review = review;
+        }
+      } else {
+        const newBook = {
+          id: Date.now().toString(),
+          title,
+          author,
+          cover,
+          coverPosition,
+          genres: selectedGenres,
+          currentPage,
+          totalPages,
+          rating,
+          dateStarted,
+          dateEnded,
+          review
+        };
+        books.push(newBook);
+      }
+
+      saveToStorage();
+      renderBooks();
+      bookModalEl.classList.remove('active');
+    });
+
+    window.editBook = function(id) {
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+
+      modalHeading.textContent = "Edit Book";
+      document.getElementById('book-id').value = book.id;
+      document.getElementById('book-title').value = book.title;
+      document.getElementById('book-author').value = book.author;
+      bookCoverInput.value = book.cover || '';
+      coverPositionSlider.value = book.coverPosition !== undefined ? book.coverPosition : 50;
+      currentPageInput.value = book.currentPage;
+      totalPagesInput.value = book.totalPages;
+      setModalStars(book.rating || 0);
+      dateStartedInput.value = book.dateStarted || '';
+      dateEndedInput.value = book.dateEnded || '';
+      document.getElementById('book-review').value = book.review || '';
+
+      document.querySelectorAll('input[name="modal-genre"]').forEach(cb => {
+        cb.checked = book.genres && book.genres.includes(cb.value);
+      });
+
+      bookModalEl.classList.add('active');
+    };
+
+    window.deleteBook = function(id) {
+      if (confirm('Delete this book?')) {
+        books = books.filter(b => b.id !== id);
+        saveToStorage();
+        renderBooks();
+      }
+    };
+
+    searchInput.addEventListener('input', renderBooks);
+    genreFilter.addEventListener('change', renderBooks);
+    ratingFilter.addEventListener('change', renderBooks);
+    sortSelect.addEventListener('change', renderBooks);
+
+    initGenreUI();
+    renderBooks();
+  </script>
+</body>
+</html>
